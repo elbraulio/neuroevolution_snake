@@ -3,7 +3,6 @@ package com.elbraulio.genetical.experiment;
 import com.elbraulio.genetical.*;
 import com.elbraulio.genetical.evolution.FittestEvolve;
 import com.elbraulio.genetical.fittestseleccion.SubsetOf;
-import example.PrecisionChart;
 import org.apache.log4j.Logger;
 
 import java.util.LinkedList;
