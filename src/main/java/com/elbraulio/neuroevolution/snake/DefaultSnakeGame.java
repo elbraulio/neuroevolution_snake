@@ -20,26 +20,21 @@ public final class DefaultSnakeGame implements SnakeGame<SnakeAction> {
         this.x = x;
         this.y = y;
         this.snake = new LinkedList<>();
-        snake.add(new Position(0, 0));
-        snake.add(new Position(0, 1));
-        snake.add(new Position(0, 2));
-        print();
+        snake.add(new Position(x/2, 0));
+        snake.add(new Position(x/2, 1));
+        snake.add(new Position(x/2, 2));
+        snake.add(new Position(x/2, 3));
+        snake.add(new Position(x/2, 4));
+        snake.add(new Position(x/2, 5));
+        snake.add(new Position(x/2, 6));
+        snake.add(new Position(x/2, 7));
+        snake.add(new Position(x/2, 8));
+        snake.add(new Position(x/2, 9));
     }
 
-    private void print() {
-        StringBuilder sb = new StringBuilder();
-
-        for (int i = 0; i < x; i++) {
-            for (int j = 0; j < y; j++) {
-                if (snake.contains(new Position(i, j))) {
-                    sb.append("1 ");
-                } else {
-                    sb.append("0 ");
-                }
-            }
-            sb.append("\n");
-        }
-        System.out.println(sb.toString());
+    @Override
+    public List<Position> snake(){
+        return snake;
     }
 
     @Override
@@ -79,10 +74,9 @@ public final class DefaultSnakeGame implements SnakeGame<SnakeAction> {
                 );
                 break;
         }
-        print();
     }
 
-    class Position {
+    static class Position {
         private int x;
         private int y;
 
