@@ -1,77 +1,83 @@
 package com.elbraulio.neuroevolution.snake;
 
+import com.elbraulio.genetical.*;
+import com.elbraulio.genetical.crosses.RandomCross;
+import com.elbraulio.genetical.experiment.DefaultExperiment;
+import com.elbraulio.genetical.fittestseleccion.FittestByScore;
+import com.elbraulio.genetical.individual.DefaultIndividual;
+import com.elbraulio.genetical.population.DefaultPopulation;
+import com.elbraulio.neuralnet.network.DefaultNetwork;
+import com.elbraulio.neuralnet.network.NeuralNetwork;
+import com.elbraulio.neuralnet.unit.NeuralUnit;
+import com.elbraulio.neuralnet.utils.Normalize;
+
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 /**
  * @author Braulio Lopez (brauliop.3@gmail.com)
  */
 public final class HelloWorld {
-    static int x = 50, y = 50;
+    private final static int x = 15, y = 15;
 
     public static void main(String... args) throws InterruptedException {
+        double learningRate = 0d;
+        // ======== Configuration ===========
+        // left, right, straight bounds; isrigth, isleft, isstraight
+        int inputLength = 6;
+        int outputLength = 3;
+        int[] hiddenLength = new int[]{10,5,10};
 
-        SnakeGame<SnakeAction> game = new DefaultSnakeGame(x, y);
-        long clock = 1000;
-
-        JFrame frame = new JFrame();
-        GridLayout grid = new GridLayout(x, y, 0, 0);
-        JPanel panel = new JPanel(grid);
-        updateGrid(panel, game.snake());
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.add(panel);
-        frame.pack();
-        frame.setLocationByPlatform(true);
-        frame.setVisible(true);
-
-        int i = 100;
-        Random random = new Random();
-        while (i-- > 0) {
-            Thread.sleep(clock);
-            int n = random.nextInt(3);
-            switch (n) {
-                case 0:
-                    game.action(SnakeAction.GO_STRAIGHT);
-                    break;
-                case 1:
-                    game.action(SnakeAction.TURN_RIGHT);
-                    break;
-                case 2:
-                    game.action(SnakeAction.TURN_LEFT);
-                    break;
-            }
-            updateGrid(panel, game.snake());
-        }
+        int popSize = 20;
+        int tournamentSize = 10;
+        int minScore = 300;
+        double biasMutation = 0.1;
+        double weightMutation = 0.1;
+        double unitMutation = 0.3;
+        // =================================
+        Population<NeuralUnit> startPop = new DefaultPopulation<>(
+                seed(
+                        popSize, learningRate, inputLength, outputLength,
+                        hiddenLength
+                )
+        );
+        Crosses<NeuralUnit> crosses = new RandomCross<>(0.5);
+        CheckSolution<NeuralUnit> solution = new SnakeSolution(
+                learningRate, outputLength,
+                hiddenLength, x, y, minScore
+        );
+        FittestSelection<NeuralUnit> selection = new FittestByScore<>(solution);
+        Mutation<NeuralUnit> mutation = new NeuralMutation(
+                biasMutation, weightMutation, unitMutation
+        );
+        PrintSolution<NeuralUnit> print = new NeuralPrint(x,y, learningRate,
+                outputLength, hiddenLength);
+        Experiment<NeuralUnit> ex = new DefaultExperiment<>(
+                solution, selection, crosses, mutation, print
+        );
+        ex.run(tournamentSize, minScore, startPop);
     }
 
-    private static void updateGrid(JPanel panel, List<DefaultSnakeGame.Position> snake) {
-        panel.removeAll();
-        for (int i = 0; i < x; i++) {
-            for (int j = 0; j < y; j++) {
-                if (snake.contains(new DefaultSnakeGame.Position(i, j))) {
-                    panel.add(makePane("white"));
-                } else {
-                    panel.add(makePane("black"));
-                }
-            }
+    private static List<Individual<NeuralUnit>> seed(
+            int popSize, double learningRate, int inputLength,
+            int outputLength, int[] hiddenLength
+    ) {
+        List<Individual<NeuralUnit>> pop = new ArrayList<>(popSize);
+        for (int i = 0; i < popSize; i++) {
+            pop.add(
+                    new DefaultIndividual<>(
+                            Arrays.asList(
+                                    new DefaultNetwork(
+                                            learningRate, inputLength,
+                                            outputLength, hiddenLength
+                                    ).neurons()
+                            )
+                    )
+            );
         }
-        panel.updateUI();
-    }
-
-    private static Component makePane(String black) {
-        JPanel panel = new JPanel();
-        switch (black) {
-            case "black":
-                panel.setPreferredSize(new Dimension(10, 10));
-                panel.setBackground(Color.BLACK);
-                return panel;
-            case "white":
-                panel.setPreferredSize(new Dimension(10, 10));
-                panel.setBackground(Color.WHITE);
-                return panel;
-        }
-        return null;
+        return pop;
     }
 }
