@@ -38,14 +38,26 @@ public final class SnakeSolution implements CheckSolution<NeuralUnit> {
                 new MakeNetwork(learningRate, outputLength, hiddenLength).net(genes);
         SnakeGame<SnakeAction> game = new DefaultSnakeGame(x, y);
         int steps = 0;
-        while(!game.isOver() && game.score() <= minScore && steps < (x + y)*2) {
+        while (!game.isOver() && game.score() <= minScore && steps < x * y) {
             Number[] out = net.feed(
-                    normalize(game.straightDistance()),
-                    normalize(game.rightDistance()),
-                    normalize(game.leftDistance()),
+                    normalize(game.straightDistance(), x),
+                    normalize(game.rightDistance(), x),
+                    normalize(game.leftDistance(), x),
                     game.isTreatLeft(),
                     game.isTreatRight(),
-                    game.isTreatStraight()
+                    game.isTreatStraight(),
+                    normalize(game.eastDistance(), x),
+                    normalize(game.westDistance(), x),
+                    normalize(game.northDistance(), x),
+                    normalize(game.southDistance(), x),
+                    normalize(game.northEastDistance(), x + y),
+                    normalize(game.northWestDistance(), x + y),
+                    normalize(game.southEastDistance(), x + y),
+                    normalize(game.southWestDistance(), x + y),
+                    game.left(),
+                    game.right(),
+                    game.down(),
+                    game.up()
             );
 
             int n;
@@ -69,13 +81,13 @@ public final class SnakeSolution implements CheckSolution<NeuralUnit> {
             }
             steps++;
         }
-        if (game.score() >= minScore){
+        if (game.score() >= minScore) {
             isFound = true;
         }
         return game.score();
     }
 
-    private Number normalize(Number raw) {
-        return new Normalize(raw, 0, x, 0, 1);
+    private Number normalize(Number raw, Number dataMax) {
+        return new Normalize(raw, 0, dataMax, 0, 1);
     }
 }

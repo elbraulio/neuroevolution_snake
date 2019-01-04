@@ -19,6 +19,7 @@ public final class DefaultSnakeGame implements SnakeGame<SnakeAction> {
     private boolean gameOver;
     private int score;
     private Position treat;
+    private List<Position> treats;
 
     public DefaultSnakeGame(int x, int y) {
 
@@ -31,7 +32,17 @@ public final class DefaultSnakeGame implements SnakeGame<SnakeAction> {
         snake.add(new Position(x / 2, 0));
         snake.add(new Position(x / 2, 1));
         snake.add(new Position(x / 2, 2));
+        buildTreats();
         this.treat = newtreat();
+    }
+
+    private void buildTreats() {
+        treats = new LinkedList<>();
+        for (int i = 0; i < x; i++) {
+            for (int j = 0; j < y; j++) {
+                treats.add(new Position(i, j));
+            }
+        }
     }
 
     private Position newtreat() {
@@ -42,6 +53,24 @@ public final class DefaultSnakeGame implements SnakeGame<SnakeAction> {
             tx = r.nextInt(x);
             ty = r.nextInt(y);
         }
+        /*int countx = 0;
+        int county = 0;
+        int pow = 1;
+        Position head = snake.get(snake.size() - 1);
+        int tx = head.x;
+        int ty = head.y;
+        while (snake.contains(new Position(tx, ty))){
+            tx += countx++*Math.pow(-1, pow++);
+            ty += county++*Math.pow(-1, pow);
+            if(tx > x || tx < 0) {
+                tx = x / 2;
+                countx=0;
+            }
+            if(ty > y || ty < 0) {
+                ty = y / 2;
+                county++;
+            }
+        }*/
         return new Position(tx, ty);
     }
 
@@ -90,12 +119,11 @@ public final class DefaultSnakeGame implements SnakeGame<SnakeAction> {
         if (treat.equals(snake.get(snake.size() - 1))) {
             treat = newtreat();
             if (!checkEnd())
-                score+=50;
+                score+=1;
         } else {
             snake.remove(0);
             checkEnd();
         }
-        score++;
     }
 
     @Override
@@ -274,20 +302,20 @@ public final class DefaultSnakeGame implements SnakeGame<SnakeAction> {
         int is = 0;
         // down
         if (head.y == neck.y && head.x > neck.x) {
-            if(head.y > treat.y)
+            if (head.y > treat.y)
                 is = 1;
             // up
         } else if (head.y == neck.y && head.x < neck.x) {
-            if(head.y < treat.y)
+            if (head.y < treat.y)
                 is = 1;
             // left
         } else if (head.x == neck.x && head.y < neck.y) {
-            if(head.x > treat.x)
-                is=1;
+            if (head.x > treat.x)
+                is = 1;
             // right
         } else if (head.x == neck.x && head.y > neck.y) {
-            if(head.x < treat.x)
-                is=1;
+            if (head.x < treat.x)
+                is = 1;
         }
         return is;
     }
@@ -299,20 +327,20 @@ public final class DefaultSnakeGame implements SnakeGame<SnakeAction> {
         int is = 0;
         // down
         if (head.y == neck.y && head.x > neck.x) {
-            if(head.y < treat.y)
+            if (head.y < treat.y)
                 is = 1;
             // up
         } else if (head.y == neck.y && head.x < neck.x) {
-            if(head.y > treat.y)
+            if (head.y > treat.y)
                 is = 1;
             // left
         } else if (head.x == neck.x && head.y < neck.y) {
-            if(head.x < treat.x)
-                is=1;
+            if (head.x < treat.x)
+                is = 1;
             // right
         } else if (head.x == neck.x && head.y > neck.y) {
-            if(head.x > treat.x)
-                is=1;
+            if (head.x > treat.x)
+                is = 1;
         }
         return is;
     }
@@ -324,20 +352,20 @@ public final class DefaultSnakeGame implements SnakeGame<SnakeAction> {
         int is = 0;
         // down
         if (head.y == neck.y && head.x > neck.x) {
-            if(head.x < treat.x)
+            if (head.x < treat.x)
                 is = 1;
             // up
         } else if (head.y == neck.y && head.x < neck.x) {
-            if(head.x > treat.x)
+            if (head.x > treat.x)
                 is = 1;
             // left
         } else if (head.x == neck.x && head.y < neck.y) {
-            if(head.y > treat.y)
-                is=1;
+            if (head.y > treat.y)
+                is = 1;
             // right
         } else if (head.x == neck.x && head.y > neck.y) {
-            if(head.x < treat.x)
-                is=1;
+            if (head.x < treat.x)
+                is = 1;
         }
         return is;
     }
@@ -345,6 +373,104 @@ public final class DefaultSnakeGame implements SnakeGame<SnakeAction> {
     @Override
     public boolean isOver() {
         return gameOver;
+    }
+
+    @Override
+    public Number eastDistance() {
+        Position head = snake.get(snake.size() - 1);
+        return head.x == treat.x && head.y < treat.y ? treat.y - head.y : 0;
+    }
+
+    @Override
+    public Number westDistance() {
+        Position head = snake.get(snake.size() - 1);
+        return head.x == treat.x && head.y > treat.y ? head.y - treat.y : 0;
+    }
+
+    @Override
+    public Number northDistance() {
+        Position head = snake.get(snake.size() - 1);
+        return head.y == treat.y && head.x > treat.x ? head.x - treat.x : 0;
+    }
+
+    @Override
+    public Number southDistance() {
+        Position head = snake.get(snake.size() - 1);
+        return head.y == treat.y && head.x < treat.x ? treat.x - head.x : 0;
+    }
+
+    @Override
+    public Number northEastDistance() {
+        Position head = snake.get(snake.size() - 1);
+        return Math.abs(head.y - treat.y) == Math.abs(head.x - treat.x) && head.x > treat.x && head.y < treat.y ?
+                head.x - treat.x + treat.y - head.y : 0;
+    }
+
+    @Override
+    public Number northWestDistance() {
+        Position head = snake.get(snake.size() - 1);
+        return Math.abs(head.y - treat.y) == Math.abs(head.x - treat.x) && head.x > treat.x && head.y > treat.y ?
+                head.x - treat.x + head.y - treat.y : 0;
+    }
+
+    @Override
+    public Number southEastDistance() {
+        Position head = snake.get(snake.size() - 1);
+        return Math.abs(head.y - treat.y) == Math.abs(head.x - treat.x) && head.x < treat.x && head.y < treat.y ?
+                treat.x - head.x + treat.y - head.y : 0;
+    }
+
+    @Override
+    public Number southWestDistance() {
+        Position head = snake.get(snake.size() - 1);
+        return Math.abs(head.y - treat.y) == Math.abs(head.x - treat.x) && head.x < treat.x && head.y > treat.y ?
+                treat.x - head.x + head.y - treat.y : 0;
+    }
+
+    @Override
+    public Number left() {
+        Position head = snake.get(snake.size() - 1);
+        Position neck = snake.get(snake.size() - 2);
+        // left
+        if (head.x == neck.x && head.y < neck.y) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
+    public Number right() {
+        Position head = snake.get(snake.size() - 1);
+        Position neck = snake.get(snake.size() - 2);
+        if (head.x == neck.x && head.y > neck.y) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
+    public Number down() {
+        Position head = snake.get(snake.size() - 1);
+        Position neck = snake.get(snake.size() - 2);
+        // down
+        if (head.y == neck.y && head.x > neck.x) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
+    public Number up() {
+        Position head = snake.get(snake.size() - 1);
+        Position neck = snake.get(snake.size() - 2);
+        if (head.y == neck.y && head.x < neck.x) {
+            return 1;
+        } else {
+            return 0;
+        }
     }
 
     private boolean checkEnd() {

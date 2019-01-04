@@ -28,4 +28,28 @@ public interface SnakeGame<T extends GameAction> {
     Number isTreatStraight();
 
     boolean isOver();
+
+    Number eastDistance();
+
+    Number westDistance();
+
+    Number northDistance();
+
+    Number southDistance();
+
+    Number northEastDistance();
+
+    Number northWestDistance();
+
+    Number southEastDistance();
+
+    Number southWestDistance();
+
+    Number left();
+
+    Number right();
+
+    Number down();
+
+    Number up();
 }
