@@ -64,16 +64,18 @@ public final class NeuralPrint implements PrintSolution<NeuralUnit> {
                             hiddenLength).net(individual.genes());
                     while (!game.isOver()) {
                         Number[] out = net.feed(
-                                normalize(game.straightDistance(), x),
-                                normalize(game.rightDistance(), x),
-                                normalize(game.leftDistance(), x),
+                                normalize(game.upDistance(), x),
+                                normalize(game.rightDistance(), y),
+                                normalize(game.leftDistance(), y),
+                                normalize(game.downDistance(), x),
                                 game.isTreatLeft(),
                                 game.isTreatRight(),
-                                game.isTreatStraight(),
-                                normalize(game.eastDistance(), x),
+                                game.isTreatUp(),
+                                game.isTreatDown(),
+                                /*normalize(game.eastDistance(), x),
                                 normalize(game.westDistance(), x),
                                 normalize(game.northDistance(), x),
-                                normalize(game.southDistance(), x),
+                                normalize(game.southDistance(), x),*/
                                 normalize(game.northEastDistance(), x + y),
                                 normalize(game.northWestDistance(), x + y),
                                 normalize(game.southEastDistance(), x + y),

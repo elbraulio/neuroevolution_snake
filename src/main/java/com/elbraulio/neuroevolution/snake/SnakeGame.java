@@ -13,11 +13,13 @@ public interface SnakeGame<T extends GameAction> {
 
     int score();
 
-    Number straightDistance();
+    Number upDistance();
 
     Number rightDistance();
 
     Number leftDistance();
+
+    Number downDistance();
 
     DefaultSnakeGame.Position treat();
 
@@ -25,7 +27,9 @@ public interface SnakeGame<T extends GameAction> {
 
     Number isTreatLeft();
 
-    Number isTreatStraight();
+    Number isTreatUp();
+
+    Number isTreatDown();
 
     boolean isOver();
 

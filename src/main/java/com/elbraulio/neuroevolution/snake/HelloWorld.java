@@ -16,22 +16,21 @@ import java.util.*;
  * @author Braulio Lopez (brauliop.3@gmail.com)
  */
 public final class HelloWorld {
-    private final static int x = 15, y = 15;
+    private final static int x = 20, y = 20;
 
     public static void main(String... args) {
         // ======== Configuration ===========
-        // left, right, straight bounds; isrigth, isleft, isstraight
-        int[] hiddenLength = new int[]{20, 10, 10};
-        int popSize = 500;
-        int tournamentSize = 100;
-        int minScore = 5;
-        double unitMutation = 0.3;
-        double biasMutation = 0.5;
-        double weightMutation = 0.2;
-        int printSince = 200;
+        int[] hiddenLength = new int[]{48,48,48};
+        int popSize = 600;
+        int tournamentSize = 200;
+        int minScore = 1000;
+        double unitMutation = 0.2;
+        double biasMutation = 0.3;
+        double weightMutation = 0.1;
+        int printSince = 0;
         // =================================
         int outputLength = 3;
-        int inputLength = 18;
+        int inputLength = 16;
         double learningRate = 0d;
         Population<NeuralUnit> startPop = new DefaultPopulation<>(
                 seed(
@@ -88,13 +87,13 @@ public final class HelloWorld {
                             )
                     )
             );
+            score[0] = offspring.get(offspring.size() - 1).scores(solution);
             if (printSince-- <= 0) {
                 print.print(
                         offspring.get(offspring.size() - 1).individuals()
                                 .get(fittestIndex(score[0]))
                 );
             }
-            score[0] = offspring.get(offspring.size() - 1).scores(solution);
         }
         scoreAverage.add(scoreAverage(score[0]));
         fittestScore.add(maxScore);

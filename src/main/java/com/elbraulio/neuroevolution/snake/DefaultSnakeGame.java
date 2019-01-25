@@ -19,7 +19,6 @@ public final class DefaultSnakeGame implements SnakeGame<SnakeAction> {
     private boolean gameOver;
     private int score;
     private Position treat;
-    private List<Position> treats;
 
     public DefaultSnakeGame(int x, int y) {
 
@@ -29,48 +28,42 @@ public final class DefaultSnakeGame implements SnakeGame<SnakeAction> {
         this.x = x;
         this.y = y;
         this.snake = new LinkedList<>();
-        snake.add(new Position(x / 2, 0));
-        snake.add(new Position(x / 2, 1));
-        snake.add(new Position(x / 2, 2));
-        buildTreats();
+        snake.add(new Position(x / 2, y/2));
+        snake.add(new Position(x / 2, y/2 + 1));
+        snake.add(new Position(x / 2, y/2 + 2));
         this.treat = newtreat();
     }
 
-    private void buildTreats() {
-        treats = new LinkedList<>();
-        for (int i = 0; i < x; i++) {
-            for (int j = 0; j < y; j++) {
-                treats.add(new Position(i, j));
-            }
-        }
-    }
-
+    double countx = 0;
+    double county = 0;
     private Position newtreat() {
-        Random r = new Random();
+        /*Random r = new Random();
         int tx = snake.get(snake.size() - 1).x;
         int ty = snake.get(snake.size() - 1).y;
         while (snake.contains(new Position(tx, ty))) {
             tx = r.nextInt(x);
             ty = r.nextInt(y);
-        }
-        /*int countx = 0;
-        int county = 0;
-        int pow = 1;
+        }*/
+
         Position head = snake.get(snake.size() - 1);
         int tx = head.x;
         int ty = head.y;
-        while (snake.contains(new Position(tx, ty))){
-            tx += countx++*Math.pow(-1, pow++);
-            ty += county++*Math.pow(-1, pow);
-            if(tx > x || tx < 0) {
-                tx = x / 2;
-                countx=0;
+        int pow = 1;
+        while (snake.contains(new Position(tx, ty))) {
+            countx+=3.16/4;
+            county+=3.16/4;
+            tx = x/2 + (int) Math.round(Math.cos(countx)*x/2*Math.pow(-1,
+                    pow++));
+            ty = y/2 + (int) Math.round(Math.sin(county)*y/2);
+            if (tx >= x || tx < 0) {
+                tx = x/2;
+                countx = 0;
             }
-            if(ty > y || ty < 0) {
-                ty = y / 2;
-                county++;
+            if (ty >= y || ty < 0) {
+                ty = y/2;
+                county = 0;
             }
-        }*/
+        }
         return new Position(tx, ty);
     }
 
@@ -116,14 +109,29 @@ public final class DefaultSnakeGame implements SnakeGame<SnakeAction> {
                 );
                 break;
         }
+        Position tail = snake.get(0);
         if (treat.equals(snake.get(snake.size() - 1))) {
             treat = newtreat();
             if (!checkEnd())
-                score+=1;
+                score += 100;
         } else {
             snake.remove(0);
             checkEnd();
         }
+
+        if (isFollowingItsTail(tail)) {
+            //score--;
+        } else {
+            //score++;
+        }
+    }
+
+    private boolean isFollowingItsTail(Position tail) {
+        Position head = snake.get(snake.size() - 1);
+        return (head.x + 1 == tail.x || head.x - 1 == tail.x || head.x ==
+        tail.x)
+                && (head.y + 1 == tail.y || head.y - 1 == tail.y || head.y ==
+                 tail.y);
     }
 
     @Override
@@ -132,161 +140,70 @@ public final class DefaultSnakeGame implements SnakeGame<SnakeAction> {
     }
 
     @Override
-    public Number straightDistance() {
+    public Number upDistance() {
         Position head = snake.get(snake.size() - 1);
-        Position neck = snake.get(snake.size() - 2);
         int distance = 0;
-        // down
-        if (head.y == neck.y && head.x > neck.x) {
-            for (int i = 0; i < snake.size() - 4; i++) {
-                if (head.y == snake.get(i).y && head.x < snake.get(i).x) {
-                    int newDistance = Math.abs(snake.get(i).x - head.x);
-                    distance = distance > newDistance ? newDistance : distance;
-                }
-            }
-            if (distance == 0) {
-                distance = x - head.x;
-            }
-            // up
-        } else if (head.y == neck.y && head.x < neck.x) {
-            for (int i = 0; i < snake.size() - 4; i++) {
-                if (head.y == snake.get(i).y && head.x > snake.get(i).x) {
-                    int newDistance = Math.abs(snake.get(i).x - head.x);
-                    distance = distance > newDistance ? newDistance : distance;
-                }
-            }
-            if (distance == 0) {
-                distance = head.x;
-            }
-            // left
-        } else if (head.x == neck.x && head.y < neck.y) {
-            for (int i = 0; i < snake.size() - 4; i++) {
-                if (head.x == snake.get(i).x && head.y > snake.get(i).y) {
-                    int newDistance = Math.abs(snake.get(i).y - head.y);
-                    distance = distance > newDistance ? newDistance : distance;
-                }
-            }
-            if (distance == 0) {
-                distance = head.y;
-            }
-            // right
-        } else if (head.x == neck.x && head.y > neck.y) {
-            for (int i = 0; i < snake.size() - 4; i++) {
-                if (head.x == snake.get(i).x && head.y < snake.get(i).y) {
-                    int newDistance = Math.abs(snake.get(i).y - head.y);
-                    distance = distance > newDistance ? newDistance : distance;
-                }
-            }
-            if (distance == 0) {
-                distance = y - head.y;
+        for (int i = 0; i < snake.size(); i++) {
+            if (head.y == snake.get(i).y && head.x > snake.get(i).x) {
+                int newDistance = Math.abs(snake.get(i).x - head.x);
+                distance = distance > newDistance ? newDistance : distance;
             }
         }
+        if (distance == 0) {
+            distance = head.x;
+        }
+        //System.out.println("upDistance: " + distance);
         return distance;
     }
 
     @Override
     public Number rightDistance() {
         Position head = snake.get(snake.size() - 1);
-        Position neck = snake.get(snake.size() - 2);
         int distance = 0;
-        // down
-        if (head.y == neck.y && head.x > neck.x) {
-            for (int i = 0; i < snake.size() - 4; i++) {
-                if (head.x == snake.get(i).x && head.y > snake.get(i).y) {
-                    int newDistance = Math.abs(snake.get(i).y - head.y);
-                    distance = distance > newDistance ? newDistance : distance;
-                }
-            }
-            if (distance == 0) {
-                distance = head.y;
-            }
-            // up
-        } else if (head.y == neck.y && head.x < neck.x) {
-            for (int i = 0; i < snake.size() - 4; i++) {
-                if (head.x == snake.get(i).x && head.y < snake.get(i).y) {
-                    int newDistance = Math.abs(snake.get(i).y - head.y);
-                    distance = distance > newDistance ? newDistance : distance;
-                }
-            }
-            if (distance == 0) {
-                distance = y - head.y;
-            }
-            // left
-        } else if (head.x == neck.x && head.y < neck.y) {
-            for (int i = 0; i < snake.size() - 4; i++) {
-                if (head.y == snake.get(i).y && head.x > snake.get(i).x) {
-                    int newDistance = Math.abs(snake.get(i).x - head.x);
-                    distance = distance > newDistance ? newDistance : distance;
-                }
-            }
-            if (distance == 0) {
-                distance = head.x;
-            }
-            // right
-        } else if (head.x == neck.x && head.y > neck.y) {
-            for (int i = 0; i < snake.size() - 4; i++) {
-                if (head.y == snake.get(i).y && head.x < snake.get(i).x) {
-                    int newDistance = Math.abs(snake.get(i).x - head.x);
-                    distance = distance > newDistance ? newDistance : distance;
-                }
-            }
-            if (distance == 0) {
-                distance = x - head.x;
+        for (int i = 0; i < snake.size(); i++) {
+            if (head.y < snake.get(i).y && head.x == snake.get(i).x) {
+                int newDistance = Math.abs(snake.get(i).y - head.y);
+                distance = distance > newDistance ? newDistance : distance;
             }
         }
+        if (distance == 0) {
+            distance = y - head.y;
+        }
+        //System.out.println("rightDistance:" + distance);
         return distance;
     }
 
     @Override
     public Number leftDistance() {
         Position head = snake.get(snake.size() - 1);
-        Position neck = snake.get(snake.size() - 2);
         int distance = 0;
-        // down
-        if (head.y == neck.y && head.x > neck.x) {
-            for (int i = 0; i < snake.size() - 4; i++) {
-                if (head.x == snake.get(i).x && head.y < snake.get(i).y) {
-                    int newDistance = Math.abs(snake.get(i).y - head.y);
-                    distance = distance > newDistance ? newDistance : distance;
-                }
-            }
-            if (distance == 0) {
-                distance = y - head.y;
-            }
-            // up
-        } else if (head.y == neck.y && head.x < neck.x) {
-            for (int i = 0; i < snake.size() - 4; i++) {
-                if (head.x == snake.get(i).x && head.y > snake.get(i).y) {
-                    int newDistance = Math.abs(snake.get(i).y - head.y);
-                    distance = distance > newDistance ? newDistance : distance;
-                }
-            }
-            if (distance == 0) {
-                distance = head.y;
-            }
-            // left
-        } else if (head.x == neck.x && head.y < neck.y) {
-            for (int i = 0; i < snake.size() - 4; i++) {
-                if (head.y == snake.get(i).y && head.x < snake.get(i).x) {
-                    int newDistance = Math.abs(snake.get(i).x - head.x);
-                    distance = distance > newDistance ? newDistance : distance;
-                }
-            }
-            if (distance == 0) {
-                distance = x - head.x;
-            }
-            // right
-        } else if (head.x == neck.x && head.y > neck.y) {
-            for (int i = 0; i < snake.size() - 4; i++) {
-                if (head.y == snake.get(i).y && head.x > snake.get(i).x) {
-                    int newDistance = Math.abs(snake.get(i).x - head.x);
-                    distance = distance > newDistance ? newDistance : distance;
-                }
-            }
-            if (distance == 0) {
-                distance = head.x;
+        for (int i = 0; i < snake.size(); i++) {
+            if (head.y > snake.get(i).y && head.x == snake.get(i).x) {
+                int newDistance = Math.abs(snake.get(i).y - head.y);
+                distance = distance > newDistance ? newDistance : distance;
             }
         }
+        if (distance == 0) {
+            distance = head.y;
+        }
+        //System.out.println("leftDistance: " + distance);
+        return distance;
+    }
+
+    @Override
+    public Number downDistance(){
+        Position head = snake.get(snake.size() - 1);
+        int distance = 0;
+        for (int i = 0; i < snake.size(); i++) {
+            if (head.y == snake.get(i).y && head.x < snake.get(i).x) {
+                int newDistance = Math.abs(snake.get(i).x - head.x);
+                distance = distance > newDistance ? newDistance : distance;
+            }
+        }
+        if (distance == 0) {
+            distance = x - head.x;
+        }
+        //System.out.println("downDistance: " + distance);
         return distance;
     }
 
@@ -298,75 +215,32 @@ public final class DefaultSnakeGame implements SnakeGame<SnakeAction> {
     @Override
     public Number isTreatRight() {
         Position head = snake.get(snake.size() - 1);
-        Position neck = snake.get(snake.size() - 2);
-        int is = 0;
-        // down
-        if (head.y == neck.y && head.x > neck.x) {
-            if (head.y > treat.y)
-                is = 1;
-            // up
-        } else if (head.y == neck.y && head.x < neck.x) {
-            if (head.y < treat.y)
-                is = 1;
-            // left
-        } else if (head.x == neck.x && head.y < neck.y) {
-            if (head.x > treat.x)
-                is = 1;
-            // right
-        } else if (head.x == neck.x && head.y > neck.y) {
-            if (head.x < treat.x)
-                is = 1;
-        }
+        int is = head.y < treat.y ? 1 : 0;
+        //System.out.println("isTreatRight: " + is);
         return is;
     }
 
     @Override
     public Number isTreatLeft() {
         Position head = snake.get(snake.size() - 1);
-        Position neck = snake.get(snake.size() - 2);
-        int is = 0;
-        // down
-        if (head.y == neck.y && head.x > neck.x) {
-            if (head.y < treat.y)
-                is = 1;
-            // up
-        } else if (head.y == neck.y && head.x < neck.x) {
-            if (head.y > treat.y)
-                is = 1;
-            // left
-        } else if (head.x == neck.x && head.y < neck.y) {
-            if (head.x < treat.x)
-                is = 1;
-            // right
-        } else if (head.x == neck.x && head.y > neck.y) {
-            if (head.x > treat.x)
-                is = 1;
-        }
+        int is = head.y > treat.y ? 1 : 0;
+        //System.out.println("isTreatLeft: " + is);
         return is;
     }
 
     @Override
-    public Number isTreatStraight() {
+    public Number isTreatUp() {
         Position head = snake.get(snake.size() - 1);
-        Position neck = snake.get(snake.size() - 2);
-        int is = 0;
-        // down
-        if (head.y == neck.y && head.x > neck.x) {
-            if (head.x < treat.x)
-                is = 1;
-            // up
-        } else if (head.y == neck.y && head.x < neck.x) {
-            if (head.x > treat.x)
-                is = 1;
-            // left
-        } else if (head.x == neck.x && head.y < neck.y) {
-            if (head.y > treat.y)
-                is = 1;
-            // right
-        } else if (head.x == neck.x && head.y > neck.y) {
-            if (head.x < treat.x)
-                is = 1;
-        }
+        int is = head.x > treat.x ? 1 : 0;
+        //System.out.println("isTreatUp: " + is);
+        return is;
+    }
+
+    @Override
+    public Number isTreatDown() {
+        Position head = snake.get(snake.size() - 1);
+        int is = head.x < treat.x ? 1 : 0;
+        //System.out.println("isTreatDown: " + is);
         return is;
     }
 
@@ -378,53 +252,78 @@ public final class DefaultSnakeGame implements SnakeGame<SnakeAction> {
     @Override
     public Number eastDistance() {
         Position head = snake.get(snake.size() - 1);
-        return head.x == treat.x && head.y < treat.y ? treat.y - head.y : 0;
+        Number distance =
+                head.x == treat.x && head.y < treat.y ? treat.y - head.y : 0;
+        //System.out.println("eastDistance: " + distance);
+        return distance;
     }
 
     @Override
     public Number westDistance() {
         Position head = snake.get(snake.size() - 1);
-        return head.x == treat.x && head.y > treat.y ? head.y - treat.y : 0;
+        Number distance = head.x == treat.x && head.y > treat.y ?
+                head.y - treat.y : 0;
+        //System.out.println("westDistance: " + distance);
+        return distance;
     }
 
     @Override
     public Number northDistance() {
         Position head = snake.get(snake.size() - 1);
-        return head.y == treat.y && head.x > treat.x ? head.x - treat.x : 0;
+        Number distance = head.y == treat.y && head.x > treat.x ?
+                head.x - treat.x
+                : 0;
+        //System.out.println("northDistance: " + distance);
+        return distance;
     }
 
     @Override
     public Number southDistance() {
         Position head = snake.get(snake.size() - 1);
-        return head.y == treat.y && head.x < treat.x ? treat.x - head.x : 0;
+        Number distance = head.y == treat.y && head.x < treat.x ?
+                treat.x - head.x : 0;
+        //System.out.println("southDistance:" + distance);
+        return distance;
     }
 
     @Override
     public Number northEastDistance() {
         Position head = snake.get(snake.size() - 1);
-        return Math.abs(head.y - treat.y) == Math.abs(head.x - treat.x) && head.x > treat.x && head.y < treat.y ?
+        Number distance =
+                head.x > treat.x && head.y < treat.y ?
                 head.x - treat.x + treat.y - head.y : 0;
+        //System.out.println("northEastDistance: " + distance);
+        return distance;
     }
 
     @Override
     public Number northWestDistance() {
         Position head = snake.get(snake.size() - 1);
-        return Math.abs(head.y - treat.y) == Math.abs(head.x - treat.x) && head.x > treat.x && head.y > treat.y ?
+        Number distance =
+                head.x > treat.x && head.y > treat.y ?
                 head.x - treat.x + head.y - treat.y : 0;
+        //System.out.println("northWestDistance: " + distance);
+        return distance;
     }
 
     @Override
     public Number southEastDistance() {
         Position head = snake.get(snake.size() - 1);
-        return Math.abs(head.y - treat.y) == Math.abs(head.x - treat.x) && head.x < treat.x && head.y < treat.y ?
+        Number distance =
+                head.x < treat.x && head.y < treat.y ?
                 treat.x - head.x + treat.y - head.y : 0;
+        //System.out.println("southEastDistance: " + distance);
+        return distance;
     }
 
     @Override
     public Number southWestDistance() {
         Position head = snake.get(snake.size() - 1);
-        return Math.abs(head.y - treat.y) == Math.abs(head.x - treat.x) && head.x < treat.x && head.y > treat.y ?
+        Number distance =
+                head.x < treat.x && head.y > treat.y ?
                 treat.x - head.x + head.y - treat.y : 0;
+        //System.out.println("southWestDistance: " +distance);
+        return distance;
     }
 
     @Override
@@ -433,8 +332,10 @@ public final class DefaultSnakeGame implements SnakeGame<SnakeAction> {
         Position neck = snake.get(snake.size() - 2);
         // left
         if (head.x == neck.x && head.y < neck.y) {
+            //System.out.println("left: 1");
             return 1;
         } else {
+            //System.out.println("left: 0");
             return 0;
         }
     }
@@ -444,8 +345,10 @@ public final class DefaultSnakeGame implements SnakeGame<SnakeAction> {
         Position head = snake.get(snake.size() - 1);
         Position neck = snake.get(snake.size() - 2);
         if (head.x == neck.x && head.y > neck.y) {
+            //System.out.println("right: 1");
             return 1;
         } else {
+            //System.out.println("right: 0");
             return 0;
         }
     }
@@ -456,8 +359,10 @@ public final class DefaultSnakeGame implements SnakeGame<SnakeAction> {
         Position neck = snake.get(snake.size() - 2);
         // down
         if (head.y == neck.y && head.x > neck.x) {
+            //System.out.println("down: 1");
             return 1;
         } else {
+            //System.out.println("down: 0");
             return 0;
         }
     }
@@ -467,8 +372,10 @@ public final class DefaultSnakeGame implements SnakeGame<SnakeAction> {
         Position head = snake.get(snake.size() - 1);
         Position neck = snake.get(snake.size() - 2);
         if (head.y == neck.y && head.x < neck.x) {
+            //System.out.println("up: 1");
             return 1;
         } else {
+            //System.out.println("up: 0");
             return 0;
         }
     }

@@ -32,20 +32,21 @@ public final class NeuralMutation implements Mutation<NeuralUnit> {
     @Override
     public List<NeuralUnit> genes(List<NeuralUnit> origin) {
         final List<NeuralUnit> genes = new ArrayList<>(origin.size());
+        final double lr = 4;
         for (int i = 0; i < origin.size(); i++) {
             Number bias = origin.get(i).args().bias();
             Number[] weights = origin.get(i).args().weights();
             if (this.random.nextDouble() < this.unitMutation) {
                 if (this.random.nextDouble() < this.biasMutation) {
                     bias = bias.doubleValue() +
-                            this.random.nextDouble() * Math.pow(
+                            lr*this.random.nextDouble() * Math.pow(
                                     -1, this.random.nextInt()
                             );
                 }
                 for (int j = 0; j < weights.length; j++) {
                     if (this.random.nextDouble() < this.weightMutation) {
                         weights[j] = weights[j].doubleValue() +
-                                this.random.nextDouble() * Math.pow(
+                                lr*this.random.nextDouble() * Math.pow(
                                         -1, this.random.nextInt()
                                 );
                     }
